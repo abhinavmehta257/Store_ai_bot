@@ -2,7 +2,7 @@ import React from "react";
 
 function Nav() {
   return (
-    <div className="w-full h-[76px] px-[96px] bg-white shadow justify-center items-center inline-flex">
+    <div className="w-full h-[76px] px-[96px] bg-white shadow justify-center items-center inline-flex text-[#2b2b2b]">
       <div className="w-full h-[76px] flex-row justify-between items-center flex">
         <div className="pb-1 justify-start items-center  gap-3 inline-flex">
           <img
@@ -10,7 +10,7 @@ function Nav() {
             src="/assets/img/logo/logo_sq.png"
           />
           <div className="w-[129.97px] h-9 text-[#161616] text-2xl font-bold font-['Quicksand'] underline leading-9">
-            Brainybear
+            WiseOwl
           </div>
         </div>
         <div className="hidden md:flex">
