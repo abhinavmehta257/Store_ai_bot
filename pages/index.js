@@ -16,7 +16,7 @@ export default function Home() {
       <Section2 />
       <Section3 />
       <Section4 />
-      <div className="h-[700px] flex items-center" style={{background:"url('/assets/img/Background (1).png')"}}>
+      <div className="h-[500px] flex items-center bg-right" style={{background:"url('/assets/img/Background (1).png')",backgroundPosition:"bottom"}}>
         <Section5 />
       </div>
       {/* <Document/> */}

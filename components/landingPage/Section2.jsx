@@ -33,7 +33,8 @@ function Section2() {
   }
 
   return (
-    <div className="bg-[url('/assets/img/how-it-works-background.png')] py-[184px] md:px-[92px] px-[32px] mt-[-80px]">
+    <div className="bg-[url('/assets/img/how-it-works-background.png')] md:py-[184px] p-[150px] md:px-[120
+    px] px-[32px] mt-[-80px]">
         <div className='flex flex-col-reverse md:flex-row gap-[24px]'>
             <div className='md:w-[50%]'>
                 <div className="text-white text-[44px] font-extrabold font-['Public Sans'] leading-[52.80px]">How it works</div>
