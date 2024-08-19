@@ -16,7 +16,7 @@ function Nav() {
             src="/assets/img/logo/logo_sq.png"
             alt="WiseOwl Logo"
           />
-          <div className="ml-3 text-2xl font-bold text-[#161616] underline font-['Quicksand']">
+          <div className="ml-3 text-2xl font-bold text-[#161616] font-['Quicksand']">
             WiseOwl
           </div>
         </div>
