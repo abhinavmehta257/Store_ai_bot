@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { Document } from "../components/Document";
 import Nav from "../components/Nav";
 import Section1 from "../components/landingPage/Section1";
@@ -11,6 +12,9 @@ export default function Home() {
 
   return (
     <>
+    <Head>
+      <title>Wise Owl</title>
+    </Head>
       <Nav />
       <Section1 />
       <Section2 />
