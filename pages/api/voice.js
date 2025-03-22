@@ -99,7 +99,7 @@ const setupSocketServer = (server) => {
           // Request a response
           // realtimeClient.send({ type: "response.create" });
         } catch (error) {
-          console.error('Error processing audio for client:', socket.id, error);
+          console.error('Error processing audio form client:', socket.id, error);
           socket.emit('error', { message: 'Error processing audio' });
         }
       });
