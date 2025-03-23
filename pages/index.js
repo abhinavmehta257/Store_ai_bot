@@ -1,6 +1,5 @@
 import Head from "next/head";
 import VoiceBot from "../components/VoiceBot";
-import { Document } from "../components/Document";
 import Nav from "../components/Nav";
 import Section1 from "../components/landingPage/Section1";
 import Section2 from "../components/landingPage/Section2";
