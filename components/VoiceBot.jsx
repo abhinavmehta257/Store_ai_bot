@@ -201,7 +201,8 @@ const VoiceBot = () => {
       });
 
       streamRef.current = stream;
-
+      console.log('Audio stream ready:', stream);
+      
       // Set up audio processing chain
       sourceNode.current = audioContext.current.createMediaStreamSource(stream);
       workletNode.current = new AudioWorkletNode(audioContext.current, 'audio-processor');
