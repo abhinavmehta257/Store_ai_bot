@@ -25,13 +25,13 @@ function Nav() {
             {/* <a href="#" className="text-black text-base font-bold font-['Quicksand']">
               Contact
             </a> */}
-            <a href="https://app.wiseowl.space/login" className="text-black text-base font-bold font-['Quicksand']">
+            {/* <a href="https://app.wiseowl.space/login" className="text-black text-base font-bold font-['Quicksand']">
               Login
-            </a>
+            </a> */}
           </div>
-          <button className="ml-6 px-6 py-1.5 bg-[#264653] rounded-md text-white text-sm font-bold font-['Quicksand']">
+          {/* <button className="ml-6 px-6 py-1.5 bg-[#264653] rounded-md text-white text-sm font-bold font-['Quicksand']">
             Start for free
-          </button>
+          </button> */}
         </div>
         <div className="md:hidden">
           <button

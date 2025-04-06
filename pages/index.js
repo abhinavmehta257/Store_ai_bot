@@ -24,7 +24,7 @@ export default function Home() {
         <Section5 />
       </div>
       {/* <Document/> */}
-      <VoiceBot />
+      {/* <VoiceBot /> */}
     </>
   );
 }

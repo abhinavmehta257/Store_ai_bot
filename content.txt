@@ -1,0 +1,104 @@
+Below is the revised landing page content with the updated "How It Works" section and modified Pricing Plans, along with the Integration & Security section removed:
+
+---
+
+### Hero Section
+**Headline:**  
+**Don't Let Missed Calls Cost You Revenue!**
+
+**Subheadline:**  
+Imagine losing potential appointments, frustrated customers, and wasted time—every time a call goes unanswered. Our AI Voicebot ensures you never miss a lead again.
+
+**CTA Button:**  
+“Book a Free Demo Now”
+
+---
+
+### Overview / Value Proposition
+**What You're Losing Without Our AI Voicebot:**  
+Every missed call is a missed opportunity. Without automation, your business risks:
+- **Lost Appointments:** Manual booking errors and delays mean fewer scheduled appointments.
+- **Customer Frustration:** Customers expect instant, 24/7 service; failing to deliver drives them to competitors.
+- **Revenue Drain:** Inefficiencies in handling inquiries result in lost sales and repeat business.
+- **Operational Overhead:** Extra staffing and time-consuming manual processes cut into your profits.
+
+---
+
+### Key Features
+**Our AI Voicebot Delivers, So You Don’t Lose Out:**
+- **Automated Call Handling:** Eliminate human error and never miss a customer inquiry.
+- **24/7 Appointment Scheduling:** Capture leads around the clock—while your competitors sleep.
+- **Seamless CRM & Calendar Integration:** Ensure no double bookings or scheduling conflicts.
+- **Multi-Language Support:** Engage a broader audience and avoid alienating non-English speakers.
+
+*Without these features, you risk higher no-show rates, inefficient call management, and a drop in revenue.*
+
+---
+
+### How It Works
+
+**1. Create Your AI Receptionist**  
+Kickstart your journey by setting up your AI-powered receptionist in minutes. Customize its appearance and tone to match your brand’s personality so it immediately resonates with your customers.
+
+**2. Train Your Receptionist**  
+Empower your virtual assistant with your unique business knowledge. Simply scan or upload your FAQs, documents, and data repositories to build a comprehensive knowledge base—ensuring your receptionist responds accurately and professionally to every inquiry.
+
+**3. Connect It with Your Twilio Number**  
+Seamlessly link your AI receptionist to your Twilio phone number. This integration ensures that every incoming call is automatically handled, so you never miss a customer call or booking opportunity.
+
+---
+
+### Use Cases / Industries Served
+**Who’s at Risk Without Automated Solutions?**
+- **Healthcare:** Missed patient appointments lead to underutilized resources and dissatisfied patients.
+- **Retail:** Delayed responses mean lost sales opportunities in a competitive market.
+- **Hospitality:** Inconsistent customer service can drive guests to rival businesses.
+- **Government Services:** Inefficient scheduling results in frustrated citizens and increased administrative costs.
+
+*If you’re not using automated solutions, you’re giving your competitors the upper hand.*
+
+---
+
+### Testimonials / Success Stories
+**Hear It From Those Who Made the Switch:**  
+*"Since adopting the AI Voicebot, our no-show rates dropped by 40%—and we’re now booking more appointments than ever. We can’t afford to go back to manual processes."*  
+— **Healthcare Provider**
+
+*"Our customers now receive immediate service, and our staff can focus on complex issues. The lost revenue from missed calls is a thing of the past."*  
+— **Retail Manager**
+
+*Without this technology, they risked constant customer churn and lost revenue opportunities.*
+
+---
+
+### Pricing Plans
+**Don’t Overpay for Missed Opportunities:**  
+Choose a plan that suits your business size and needs. Our flexible pricing ensures you get top-notch service without overspending.  
+Every minute not automated is money left on the table!
+
+**[Get a Quote]**  
+*Enter your email below to receive personalized pricing details and start saving today.*  
+[Email Input Field] [Submit Button]
+
+---
+
+### FAQ
+**Frequently Asked Questions**  
+- **What if my business can’t handle 24/7 calls?**  
+  Missing calls means missing revenue—our AI Voicebot ensures every customer inquiry is answered instantly.
+- **How does it integrate with my current system?**  
+  Our seamless integrations mean you won’t lose valuable data or time—avoid the chaos of manual entry.
+- **What about data security?**  
+  We use robust security measures to protect your customer information—don’t risk your reputation with weak data practices.
+
+---
+
+### Final CTA Footer
+**Ready to Stop Losing Revenue?**  
+Book a free demo now and see how our AI Voicebot can transform your customer interactions, streamline scheduling, and prevent missed opportunities.
+
+**[Get Started Today]**
+
+---
+
+This revised content emphasizes the risk of lost opportunities without automation and clearly explains the simple setup process while encouraging users to request pricing with a direct email input CTA. Let me know if you'd like any further adjustments!

@@ -1,62 +1,56 @@
 import React from 'react'
 
 function Section3() {
-
     return (
         <div className='md:p-[120px] p-[32px] flex md:flex-row flex-col gap-[48px]'>
             <div className='md:py-[56px] md:px-[48px] bg-[#F6F6F7] rounded-[24px] p-[32px]'>
                 <div
-                    className="text-[#2b2b2b] text-[38px] font-extrabold font-['Public Sans'] leading-[41.80px]">Traditional<br/>Flow-Based Chatbots</div>
+                    className="text-[#2b2b2b] text-[38px] font-extrabold font-['Public Sans'] leading-[41.80px]">Traditional Chatbots</div>
                 <ul className='list-disc text-[#2b2b2b] mt-[36px] flex flex-col gap-[16px]'>
                     <li>
-                        <b>Time-Consuming Setup:</b>
-                        Takes time to set up the flow and train, which can delay getting started.
+                        <b>Text-Based Only:</b> Requires users to type out responses, which can be slower and less natural.
                     </li>
                     <li>
-                      <b>Can’t Go Off-Script:</b> Understands and responds just like a person would, making conversations feel natural and easy.
+                        <b>Limited Accessibility:</b> Not ideal for visually impaired or multitasking users.
                     </li>
                     <li>
-                      <b>Doesn’t Get the Full Picture:</b> Ready for anything you throw at it, no matter how unexpected.
+                        <b>Less Personal Experience:</b> Feels more like filling out a form than having a conversation.
                     </li>
                     <li>
-                      <b>Can’t Learn New Tricks:</b> : Learns from each chat, becoming better and more helpful with every conversation.
+                        <b>Can Be Slower in Response:</b> Often requires multiple back-and-forth messages to get the full context.
                     </li>
                     <li>
-                      <b>Needs Regular Updates:</b> : Once set up, it takes care of itself, needing fewer check-ins or tweaks from you.
+                        <b>Harder to Use on the Go:</b> Typing while moving or driving isn't always safe or practical.
                     </li>
                     <li>
-                      <b>Might Feel Robotic:</b> : Makes sure people enjoy chatting, helping them stick around longer and feel more satisfied.
+                        <b>Less Human-Like:</b> Lacks tone, emotion, and natural pauses that come with real voice conversation.
                     </li>
                 </ul>
             </div>
             <div className='md:py-[56px] md:px-[48px] bg-[#264653] rounded-[24px] p-[32px]'>
                 <div
-                    className="text-white text-[38px] font-extrabold font-['Public Sans'] leading-[41.80px]">WiseOwl<br/>GPT-based AI Chatbots</div>
+                    className="text-white text-[38px] font-extrabold font-['Public Sans'] leading-[41.80px]">WiseOwl Voicebots</div>
                 <ul className='list-disc text-white mt-[36px] flex flex-col gap-[16px]'>
                     <li>
-                        <b>Time-Consuming Setup:</b>
-                        Takes time to set up the flow and train, which can delay getting started.
+                        <b>Natural Voice Interaction:</b> Lets users speak freely, just like talking to a real person.
                     </li>
                     <li>
-                      <b>Talks Like a Human:</b> Understands and responds just like a person would, making conversations feel natural and easy.
+                        <b>Hands-Free Convenience:</b> Perfect for multitasking, driving, or accessibility needs.
                     </li>
                     <li>
-                      <b>Handles Any Question:</b> Ready for anything you throw at it, no matter how unexpected.
+                        <b>Faster Resolutions:</b> Can process and respond to queries more fluidly than text-based flows.
                     </li>
                     <li>
-                      <b>Gets Smarter Over Time:</b> : Learns from each chat, becoming better and more helpful with every conversation.
+                        <b>Emotionally Engaging:</b> Uses tone and inflection to create more relatable, human-like interactions.
                     </li>
                     <li>
-                      <b>Less Work for You:</b> : Once set up, it takes care of itself, needing fewer check-ins or tweaks from you.
+                        <b>Context-Aware Conversations:</b> Understands user intent even when phrased differently.
                     </li>
                     <li>
-                      <b>Keeps Users Happy:</b> : Makes sure people enjoy chatting, helping them stick around longer and feel more satisfied.
+                        <b>Multi-Language Ready:</b> Supports global audiences with real-time translation and localization.
                     </li>
                     <li>
-                      <b>Fits Right In:</b> : Works great in all kinds of settings, from customer help desks to fun chats on social apps.
-                    </li>
-                    <li>
-                      <b>Multilingual Support:</b> : Understands and supports over 80 languages, making it perfect for global reach.
+                        <b>Always On, Always Listening:</b> Ready to jump into a conversation without typing or searching.
                     </li>
                 </ul>
             </div>

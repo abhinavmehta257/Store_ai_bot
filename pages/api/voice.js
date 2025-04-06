@@ -73,6 +73,8 @@ const setupSocketServer = (server) => {
       });
 
       realtimeClient.on("response.audio.delta", (event) => {
+        console.log('Received audio data from azure:', socket.id);
+
         socket.emit('audio:response', { data: event.delta });
       });
 
@@ -87,7 +89,7 @@ const setupSocketServer = (server) => {
 
       // Handle client events
       socket.on('audio:stream', async (base64Data) => {
-        console.log('Received audio data from client:', socket.id, socket.listenerCount('audio:stream'));
+        console.log('Received audio data from client:', base64Data.length, 'bytes');
         
         try {
           // Send audio data to Azure

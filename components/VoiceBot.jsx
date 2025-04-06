@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { PhoneIcon, PhoneXMarkIcon } from '@heroicons/react/24/solid';
-import io from 'socket.io-client';
+import { RTClient } from 'rt-client';
+
+// Import the AudioHandler class (ensure its file path is correct)
+import AudioHandler from './lib/audio'; // adjust the path as needed
 
 // Helper function to wrap PCM16 data in a WAV header
 function createWavFile(pcmData, sampleRate = 24000, channels = 1, bitsPerSample = 16) {
@@ -41,277 +44,321 @@ function createWavFile(pcmData, sampleRate = 24000, channels = 1, bitsPerSample 
   return wavBuffer.buffer;
 }
 
+const instructions =  `Role:
+You are an AI assistant designed to help customers with their queries related to WiseOwl. Your goal is to provide accurate and helpful responses while ensuring a smooth and friendly interaction.
+
+Instructions:
+
+Greet the Customer:
+
+Start every conversation with a warm and professional greeting:
+"Hello! Thanks for contacting WiseOwl. How can I assist you today?"
+
+Provide Relevant Support:
+
+Only answer queries specifically related to WiseOwl and its services.
+
+1. If the customer asks about unrelated topics, politely inform them:
+"I'm here to assist with WiseOwl-related questions. Let me know how I can help!"
+2. Be polite, concise, and professional while ensuring the customer feels heard.
+3. Provide step-by-step guidance when necessary.
+4. If an issue requires further assistance, suggest contacting using support@wiseowl.space
+
+at any point if you are not able to understand the query, ask the customer to repeat them.
+`
+
 const VoiceBot = () => {
   const [isListening, setIsListening] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState('disconnected');
 
-  const socketRef = useRef(null);
-  const audioContext = useRef(null);
-  const audioQueue = useRef([]);
-  const isProcessingAudio = useRef(false);
-  const streamRef = useRef(null);
-  const sourceNode = useRef(null);
-  const workletNode = useRef(null);
-  const audioBufferRef = useRef([]);
-  const intervalRef = useRef(null);
+  // Remove manual audio context, source and worklet nodes
+  const callTimerRef = useRef(null);
+  const clientRef = useRef(null);
+  const audioHandlerRef = useRef(null);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  // Get configuration values from environment variables
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  const endpoint = process.env.NEXT_PUBLIC_ENDPOINT;
+  const modelName = process.env.NEXT_PUBLIC_MODEL_NAME; // used as deployment name
 
-    const initAudio = async () => {
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioContext.current = new AudioContext({ sampleRate: 24000 });
-        // Load your audio worklet processor
-        await audioContext.current.audioWorklet.addModule('/audio-processor.js');
-        console.log('Audio worklet loaded successfully');
-      } catch (error) {
-        console.error('Error loading audio worklet:', error);
-      }
-    };
-
-    initAudio();
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const initSocket = async () => {
-      // Initialize socket server
-      await fetch('/api/voice');
-      const socket = io();
-      socketRef.current = socket;
-
-      socket.on('connect', () => {
-        console.log('Socket connected');
-        setStatus('connected');
-      });
-
-      socket.on('connected', () => {
-        console.log('Azure session ready');
-        setStatus('ready');
-      });
-
-      socket.on('transcription', ({ text }) => {
-        setMessages((prev) => [...prev, { type: 'user', text }]);
-      });
-
-      socket.on('audio:response', ({ data }) => {
-        console.log('Received audio response');
-        // Convert base64 encoded string back to a buffer
-        const audioData = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
-        playAudioResponse(audioData.buffer);
-      });
-
-      socket.on('error', ({ message }) => {
-        console.error('Server error:', message);
-        setStatus('error');
-        stopListening();
-      });
-
-      socket.on('disconnect', () => {
-        console.log('Socket disconnected');
-        setStatus('disconnected');
-        stopListening();
-      });
-    };
-
-    initSocket();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-      if (audioContext.current?.state !== 'closed') {
-        audioContext.current.close();
-      }
-    };
-  }, []);
-
-  const playAudioResponse = async (audioBufferData) => {
+  // Initialize RTClient connection
+  const initRTClient = () => {
     try {
-      // Add the incoming audio buffer to the queue
-      audioQueue.current.push(audioBufferData);
+      clientRef.current = new RTClient(new URL(endpoint), { key: apiKey }, { deployment: modelName });
 
-      if (!isProcessingAudio.current) {
-        processAudioQueue();
-      }
-    } catch (error) {
-      console.error('Error playing audio:', error);
-    }
-  };
+      const modalities= ["text", "audio"]
+        const turnDetection = { type: "server_vad" }
+        const temperature = 0.9;
 
-  const processAudioQueue = async () => {
-    if (audioQueue.current.length === 0 || !audioContext.current) {
-      isProcessingAudio.current = false;
-      return;
-    }
-
-    isProcessingAudio.current = true;
-    const buffer = audioQueue.current.shift();
-
-    try {
-      if (audioContext.current.state === 'suspended') {
-        console.log('Resuming audio context');
-        await audioContext.current.resume();
-      }
-
-      console.log('Playing audio response', buffer);
-      // Wrap the raw PCM16 data in a WAV header
-      const wavBuffer = createWavFile(buffer, 24000, 1, 16);
-      const decodedAudioBuffer = await audioContext.current.decodeAudioData(wavBuffer);
-      if (!decodedAudioBuffer) return;
-
-      const source = audioContext.current.createBufferSource();
-      source.buffer = decodedAudioBuffer;
-      source.connect(audioContext.current.destination);
-
-      source.onended = () => {
-        processAudioQueue();
-      };
-
-      source.start();
-    } catch (error) {
-      console.error('Error processing audio:', error);
-      processAudioQueue();
-    }
-  };
-
-  const startListening = async () => {
-    try {
-      if (typeof window === 'undefined') return;
-      if (!socketRef.current?.connected) {
-        console.log('Socket not connected');
-        return;
-      }
-
-      if (!navigator?.mediaDevices?.getUserMedia) {
-        throw new Error('Media devices not supported');
-      }
-
-      // Request audio input
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 24000,
-        },
-      });
-
-      streamRef.current = stream;
-      console.log('Audio stream ready:', stream);
+        clientRef.current.configure({
+          instructions: instructions?.length > 0 ? instructions : undefined,
+          input_audio_transcription: { model: "whisper-1" },
+          turn_detection: turnDetection,
+          temperature,
+          modalities,
+        });
+      // Start listening for RTClient responses (transcriptions, etc.)
+      console.log('RTClient initialized:', clientRef.current);
       
-      // Set up audio processing chain
-      sourceNode.current = audioContext.current.createMediaStreamSource(stream);
-      workletNode.current = new AudioWorkletNode(audioContext.current, 'audio-processor');
-
-      audioBufferRef.current = [];
-
-      // Buffer audio and send every 1 second
-      intervalRef.current = setInterval(() => {
-        if (audioBufferRef.current.length > 0) {
-          const base64Data = btoa(
-            String.fromCharCode(...new Uint8Array(audioBufferRef.current.flat()))
-          );
-          socketRef.current.emit('audio:stream', base64Data);
-          audioBufferRef.current = [];
-        }
-      }, 1000);
-
-      // Handle audio data from worklet
-      workletNode.current.port.onmessage = (event) => {
-        if (event.data.type === 'audio' && socketRef.current?.connected) {
-          audioBufferRef.current.push([...new Uint8Array(event.data.data.buffer)]);
-        }
-      };
-
-      // Connect audio nodes
-      sourceNode.current.connect(workletNode.current);
-      workletNode.current.connect(audioContext.current.destination);
-
-      setIsListening(true);
-      setMessages([]);
+      startResponseListener();
+      setStatus('ready');
     } catch (error) {
-      console.error('Error accessing microphone:', error);
+      console.error('RTClient initialization failed:', error);
       setStatus('error');
     }
   };
 
-  const stopListening = () => {
-    // Clean up audio resources
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+  // Listen for responses from Azure via RTClient
+  const startResponseListener = async () => {
+    if (!clientRef.current) return;
+    try {
+      for await (const serverEvent of clientRef.current.events()) {
+        console.log('Server event:', serverEvent);
+        
+        if (serverEvent.type === "response") {
+          await handleResponse(serverEvent);
+        } else if (serverEvent.type === "input_audio") {
+          await handleInputAudio(serverEvent);
+        }
+        // Extend handling for additional event types as needed.
+      }
+    } catch (error) {
+      console.error('Response iteration error:', error);
     }
+  };
 
-    if (sourceNode.current) {
-      sourceNode.current.disconnect();
-      sourceNode.current = null;
+  const handleInputAudio = async (item) => {
+    audioHandlerRef.current?.stopStreamingPlayback();
+    await item.waitForCompletion();
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        type: "user",
+        content: item.transcription || "",
+      },
+    ]);
+  };
+
+
+  
+  const handleResponse = async (response) => {
+    for await (const item of response) {
+      if (item.type === "message" && item.role === "assistant") {
+        const message = {
+          type: item.role,
+          content: "",
+        };
+        setMessages((prevMessages) => [...prevMessages, message]);
+        for await (const content of item) {
+          if (content.type === "text") {
+            for await (const text of content.textChunks()) {
+              message.content += text;
+              setMessages((prevMessages) => {
+                prevMessages[prevMessages.length - 1].content = message.content;
+                return [...prevMessages];
+              });
+            }
+          } else if (content.type === "audio") {
+            const textTask = async () => {
+              for await (const text of content.transcriptChunks()) {
+                message.content += text;
+                setMessages((prevMessages) => {
+                  prevMessages[prevMessages.length - 1].content =
+                    message.content;
+                  return [...prevMessages];
+                });
+              }
+            };
+            const audioTask = async () => {
+              audioHandlerRef.current?.startStreamingPlayback();
+              for await (const audio of content.audioChunks()) {
+                audioHandlerRef.current?.playChunk(audio);
+              }
+            };
+            await Promise.all([textTask(), audioTask()]);
+          }
+        }
+      }
     }
+  };
 
-    if (workletNode.current) {
-      workletNode.current.disconnect();
-      workletNode.current = null;
+
+  const startListening = async () => {
+    try {
+      // Initialize RTClient if not already done
+      if (!clientRef.current) {
+        initRTClient();
+        console.log('Initializing RTClient...');
+        
+      }
+      setStatus('connecting');
+
+      // Initialize AudioHandler if needed
+      if (!audioHandlerRef.current) {
+        console.log('Initializing AudioHandler...');
+        
+        audioHandlerRef.current = new AudioHandler();
+        await audioHandlerRef.current.initialize();
+        console.log('AudioHandler initialized:', audioHandlerRef.current);
+        
+      }
+
+      // Start recording using AudioHandler. For every audio chunk, send it to Azure.
+      await audioHandlerRef.current.startRecording(async(chunk) => {        
+        if (clientRef.current) {        
+          await clientRef.current.sendAudio(chunk);
+        }
+      });
+
+      setIsListening(true);
+      setMessages([]);
+
+      // Start call duration timer
+      const startTime = Date.now();
+      callTimerRef.current = setInterval(() => {
+        setCallDuration(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+
+      setStatus('ready');
+    } catch (error) {
+      console.error('Error starting listening:', error);
+      setStatus('error');
     }
+  };
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+  // Stop recording and finish sending audio to Azure
+  const stopListening = async () => {
+    try {
+      if (audioHandlerRef.current) {
+        audioHandlerRef.current.stopRecording();
+        audioHandlerRef.current.stopStreamingPlayback();
+      }
+
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current);
+        callTimerRef.current = null;
+      }
+
+      // If RTClient is active, commit the audio and trigger final processing
+      if (clientRef.current) {
+        try {
+          const inputAudio = await clientRef.current.commitAudio();
+          // Optionally, trigger further response generation here.
+          // e.g., await clientRef.current.generateResponse();
+        } catch (error) {
+          console.error('Error committing audio:', error);
+        }
+      }
+
+      setIsListening(false);
+      setCallDuration(0);
+      setStatus('disconnected');
+    } catch (error) {
+      console.error('Error stopping listening:', error);
     }
-
-    setIsListening(false);
   };
 
   const toggleListening = () => {
     if (isListening) {
       stopListening();
+      setIsFullScreen(false);
     } else {
+      setIsFullScreen(true);
       startListening();
     }
   };
 
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      stopListening();
+      audioHandlerRef.current?.close().catch(console.error);
+      clientRef.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    const initAudioHandler = async () => {
+      const handler = new AudioHandler();
+      await handler.initialize();
+      audioHandlerRef.current = handler;
+    };
+
+    initAudioHandler().catch(console.error);
+
+    return () => {
+      // disconnect();
+      audioHandlerRef.current?.close().catch(console.error);
+    };
+  }, []);
+
   return (
-    <div className="fixed bottom-8 right-8 flex flex-col items-end gap-4">
-      <div className="bg-white p-4 rounded-lg shadow-lg max-w-md">
-        <div className="flex items-center gap-2 mb-2">
-          <div
-            className={`w-2 h-2 rounded-full ${
-              status === 'ready'
-                ? 'bg-green-500'
-                : status === 'connected'
-                ? 'bg-yellow-500'
-                : status === 'error'
-                ? 'bg-red-500'
-                : 'bg-gray-500'
-            }`}
-          />
-          <span className="text-sm text-gray-600 capitalize">{status}</span>
-        </div>
-        <div className="space-y-2 max-h-60 overflow-y-auto">
-          {messages.map((msg, idx) => (
+    <div className={`${isFullScreen ? 'fixed inset-0 bg-black' : 'fixed bottom-8 right-8'} flex flex-col items-end gap-4`}>
+      {isFullScreen ? (
+        
+        <div className="flex flex-col items-center justify-center h-full w-full">
+          <div className="text-white text-2xl font-bold mb-2">WiseOwl</div>
+          <div className="flex items-center gap-2 mb-2">
             <div
-              key={idx}
-              className={`p-2 rounded ${
-                msg.type === 'user' ? 'bg-blue-100' : 'bg-green-100'
+              className={`w-2 h-2 rounded-full ${
+                status === 'ready'
+                  ? 'bg-green-500'
+                  : status === 'connecting'
+                  ? 'bg-yellow-500'
+                  : status === 'error'
+                  ? 'bg-red-500'
+                  : 'bg-gray-500'
               }`}
-            >
-              <p className="text-sm">{msg.text}</p>
-            </div>
-          ))}
+            />
+            <span className="text-sm text-gray-600 capitalize">{status}</span>
+          </div>
+          <div className="text-white text-lg mb-8">
+            {status === 'connecting' ? 'Connecting...' : `Call Duration: ${callDuration}s`}
+          </div>
+          <div className="flex-1 px-8 overflow-y-auto">
+            {messages.map((message, index) => (
+              message.content.length > 0 ? <div
+                key={index}
+                className={`mb-4 p-3 rounded-lg${
+                  message.type === "user"
+                    ? " bg-slate-200 ml-auto max-w-[80%]"
+                    : " bg-slate-600 mr-auto max-w-[80%]"
+                }`}
+              >
+                {message.content}
+              </div> : null
+            ))}
+          </div>
+          <div className='p-8'>
+            <button
+                onClick={toggleListening}
+                className="p-6 rounded-full text-white bg-red-600 hover:bg-red-700 shadow-lg"
+              >
+                <PhoneXMarkIcon className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-      </div>
-      <button
-        onClick={toggleListening}
-        className="p-4 rounded-full text-white bg-blue-600 hover:bg-blue-700 shadow-lg"
-      >
-        {isListening ? (
-          <PhoneXMarkIcon className="h-6 w-6" />
-        ) : (
-          <PhoneIcon className="h-6 w-6" />
-        )}
-      </button>
+      ) : (
+        <>
+          <div className="bg-white p-4 rounded-lg shadow-lg max-w-md">
+            Lets Connect
+          </div>
+          <button
+            onClick={toggleListening}
+            className="p-4 rounded-full text-white bg-blue-600 hover:bg-blue-700 shadow-lg"
+          >
+            {isListening ? (
+              <PhoneXMarkIcon className="h-6 w-6" />
+            ) : (
+              <PhoneIcon className="h-6 w-6" />
+            )}
+          </button>
+          
+        </>
+        
+      )}
     </div>
   );
 };
