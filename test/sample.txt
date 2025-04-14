@@ -1,0 +1,16 @@
+This is a sample document for testing the document upload and chunking functionality.
+
+The document contains multiple paragraphs to test the chunking process. Each paragraph should be properly split and processed.
+
+Here's another paragraph with some specific information about our AI agents. They are capable of natural language understanding and can handle various customer service scenarios effectively.
+
+This system uses advanced natural language processing to understand customer queries and respond appropriately. The responses are generated based on the knowledge base that has been built from uploaded documents.
+
+When a document is uploaded, it goes through several processing steps:
+1. Initial validation and storage
+2. Text extraction based on file type
+3. Splitting into manageable chunks
+4. Storage in the knowledge base
+5. Association with the specific agent
+
+Each chunk is stored with proper metadata including the source document and the agent it belongs to. This ensures proper organization and retrieval of information.
