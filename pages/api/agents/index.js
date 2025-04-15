@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
-import { createAgent, getAgentsByUserId } from '../../../models/Agent';
+import { createAgent, getAgentsByUserId, isPhoneNumberAvailable } from '../../../models/Agent';
 import { configureWebhook, verifyWebhookConfiguration } from '../../../lib/twilio';
 import { checkUserHasTwilio } from '../../../models/User';
 
@@ -42,40 +42,99 @@ export default async function handler(req, res) {
 
           if (!name || !twilioPhoneNumber || !greetingPhrase) {
             return res.status(400).json({ 
+              code: 'MISSING_FIELDS',
               message: 'Missing required fields: name, twilioPhoneNumber, greetingPhrase' 
             });
           }
 
-          // Create the agent first
-          const newAgent = await createAgent({
-            name,
-            twilioPhoneNumber,
-            greetingPhrase,
-            systemMessage,
-            userId: session.user.id
-          });
+          // Check if phone number is already assigned to an agent
+          const isAvailable = await isPhoneNumberAvailable(twilioPhoneNumber);
+          if (!isAvailable) {
+            return res.status(400).json({
+              code: 'PHONE_NUMBER_TAKEN',
+              message: 'This phone number is already assigned to another agent'
+            });
+          }
 
-          // Configure the webhook for the phone number
-          const webhookResult = await configureWebhook({
-            userEmail: session.user.email,
-            phoneNumber: twilioPhoneNumber,
-            agentId: newAgent.id
-          });
+          // Try to configure the webhook first
+          let webhookResult;
+          try {
+            webhookResult = await configureWebhook({
+              userEmail: session.user.email,
+              phoneNumber: twilioPhoneNumber,
+              // Pass temporary ID since we don't have agent yet
+              agentId: `temp_${Date.now()}`
+            });
 
-          // Verify the webhook configuration
-          const verificationResult = await verifyWebhookConfiguration({
-            userEmail: session.user.email,
-            phoneNumber: twilioPhoneNumber
-          });
-
-          return res.status(201).json({
-            ...newAgent,
-            webhook: {
-              configured: webhookResult.success,
-              url: webhookResult.webhookUrl,
-              verified: verificationResult.success
+            if (!webhookResult.success) {
+              return res.status(400).json({
+                code: 'WEBHOOK_CONFIG_FAILED',
+                message: 'Failed to configure Twilio webhook for this phone number'
+              });
             }
-          });
+          } catch (error) {
+            return res.status(400).json({
+              code: 'WEBHOOK_CONFIG_FAILED',
+              message: 'Failed to configure Twilio webhook: ' + error.message
+            });
+          }
+
+          // Verify webhook configuration
+          let verificationResult;
+          try {
+            verificationResult = await verifyWebhookConfiguration({
+              userEmail: session.user.email,
+              phoneNumber: twilioPhoneNumber
+            });
+
+            if (!verificationResult.success) {
+              return res.status(400).json({
+                code: 'WEBHOOK_VERIFY_FAILED',
+                message: 'Failed to verify Twilio webhook configuration'
+              });
+            }
+          } catch (error) {
+            return res.status(400).json({
+              code: 'WEBHOOK_VERIFY_FAILED',
+              message: 'Failed to verify Twilio webhook: ' + error.message
+            });
+          }
+
+          // Only create the agent if webhook configuration succeeds
+          try {
+            const newAgent = await createAgent({
+              name,
+              twilioPhoneNumber,
+              greetingPhrase,
+              systemMessage,
+              userId: session.user.id
+            });
+
+            // Update webhook with actual agent ID
+            await configureWebhook({
+              userEmail: session.user.email,
+              phoneNumber: twilioPhoneNumber,
+              agentId: newAgent.id
+            });
+
+            return res.status(201).json({
+              ...newAgent,
+              webhook: {
+                configured: true,
+                url: webhookResult.webhookUrl,
+                verified: true
+              }
+            });
+          } catch (error) {
+            // If agent creation fails, return specific error
+            if (error.message.includes('already assigned')) {
+              return res.status(400).json({
+                code: 'PHONE_NUMBER_TAKEN',
+                message: error.message
+              });
+            }
+            throw error; // Re-throw other errors to be caught by outer catch
+          }
         } catch (error) {
           console.error('Error creating agent:', error);
           return res.status(500).json({ 
