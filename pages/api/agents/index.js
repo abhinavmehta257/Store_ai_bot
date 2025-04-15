@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]';
 import { createAgent, getAgentsByUserId } from '../../../models/Agent';
 import { configureWebhook, verifyWebhookConfiguration } from '../../../lib/twilio';
+import { checkUserHasTwilio } from '../../../models/User';
 
 export default async function handler(req, res) {
   try {
@@ -28,6 +29,15 @@ export default async function handler(req, res) {
       case 'POST':
         // Create a new agent
         try {
+          // First check if user has Twilio configured
+          const hasTwilio = await checkUserHasTwilio(session.user.id);
+          if (!hasTwilio) {
+            return res.status(400).json({
+              code: 'TWILIO_NOT_CONFIGURED',
+              message: 'Twilio configuration required to create agents. Please configure your Twilio account first.'
+            });
+          }
+
           const { name, twilioPhoneNumber, greetingPhrase, systemMessage } = req.body;
 
           if (!name || !twilioPhoneNumber || !greetingPhrase) {

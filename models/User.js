@@ -90,3 +90,14 @@ export const checkTwilioAccount = async (email) => {
     isFirstLogin: user.isFirstLogin
   };
 };
+
+export const checkUserHasTwilio = async (userId) => {
+  const collection = await getCollection(COLLECTION_NAME);
+  const user = await collection.findOne({ id: userId });
+  
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return user.hasTwilioAccount || false;
+};
