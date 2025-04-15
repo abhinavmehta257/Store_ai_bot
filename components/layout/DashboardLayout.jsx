@@ -10,6 +10,8 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
 
   React.useEffect(() => {
+    console.log('Session status:', status);
+    
     if (status === 'unauthenticated') {
       router.replace('/auth/login');
     }

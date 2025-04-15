@@ -27,10 +27,10 @@ export const authOptions = {
             };
           }
 
-          return null;
+          throw new Error('Invalid credentials');
         } catch (error) {
           console.error('Auth error:', error);
-          return null;
+          throw new Error(error.message || 'Invalid credentials');
         }
       },
     }),
@@ -64,7 +64,10 @@ export const authOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours - match session maxAge
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

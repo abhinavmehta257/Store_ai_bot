@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 
-export default function Login() {
+function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
@@ -24,24 +25,21 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false
       });
 
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || 'Something went wrong');
+      if (result?.error) {
+        setError(result.error);
+        return;
       }
 
-      // Redirect to dashboard or home page after successful login
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError('An unexpected error occurred');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -126,3 +124,6 @@ export default function Login() {
     </div>
   );
 }
+
+Login.authPage = true;
+export default Login;
