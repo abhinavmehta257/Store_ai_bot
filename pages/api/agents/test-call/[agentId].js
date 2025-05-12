@@ -26,6 +26,8 @@ export default async function handler(req, res) {
     // }
 
     // Forward the request to call server
+    console.log(`Initiating test call to ${to} from ${from} for agent ${agentId}`);
+    
     const response = await fetch(`${process.env.CALL_SERVER_URL}/outbound/${agentId}`, {
       method: 'POST',
       headers: {

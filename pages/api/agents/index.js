@@ -63,7 +63,7 @@ export default async function handler(req, res) {
               userEmail: session.user.email,
               phoneNumber: twilioPhoneNumber,
               // Pass temporary ID since we don't have agent yet
-              agentId: `temp_${Date.now()}`
+              agentId: `agent_${Date.now()}`
             });
 
             if (!webhookResult.success) {
